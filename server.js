@@ -62,7 +62,7 @@ function calculateGameFilePath() {
 	todayPath = 'year_' + today.getFullYear() + '/month_' + month + '/day_' + date + '/';
 	console.log('todayPath=' + todayPath);
 	notificationURL = 'notifications/notifications_full.xml';
-	gamePath = 'gid_2016_05_16_minmlb_detmlb_1/';
+	gamePath = 'gid_2016_05_16_minmlb_detmlb_1/';  //NEED TO ADJUST THIS EACH DAY DURING DEBUGGING
 	composedURL = baseURL + todayPath + gamePath + notificationURL;
 	return composedURL;
 }
@@ -73,11 +73,16 @@ function getNextScore(fullNotificationsObj) {
 	//get the right team's notification list
 	var teamNodes = [];
 	var teamNode;
+	var DETisAway;
 	teamNodes = fullNotificationsObj.notifications.team;
 	if (teamNodes[0].$.code == 'det') {
 		teamNode = teamNodes[0];
+		DETisAway = true;
+		otherTeamCode = teamNodes[1].$.code;
 	} else {
 		teamNode = teamNodes[1];
+		DETisAway = false;
+		otherTeamCode = teamNodes[0].$.code;
 	}
 
 	//console.log('length of teamNode.notification: ' + teamNode.notification.length);
@@ -91,13 +96,43 @@ function getNextScore(fullNotificationsObj) {
 			console.log('index of this uid in the array=' + alreadyReportedScores.indexOf(thisNotification.$.uid));
 			if (alreadyReportedScores.indexOf(thisNotification.$.uid) == -1) {
 				alreadyReportedScores.push(thisNotification.$.uid);
-				return thisNotification.$.pbp + 
-						' [Score: Away ' + thisNotification.$.away_team_runs + 
-						', Home ' + thisNotification.$.home_team_runs + ']';
+
+				//going to return a score to the client
+				var boxScore;
+				var inning = ordinal_suffix_of(thisNotification.$.inning);
+				if (DETisAway) {
+					boxScore = ' [' + inning + ': DET ' + thisNotification.$.away_team_runs + 
+						', ' + otherTeamCode.toUpperCase() + ' ' + thisNotification.$.home_team_runs + ']';	
+				}
+				else {
+					boxScore = ' [' + inning + ': ' + otherTeamCode.toUpperCase() + ' ' + thisNotification.$.away_team_runs + 
+						', DET ' + thisNotification.$.home_team_runs + ']';						
+				}
+				return thisNotification.$.pbp + boxScore;
 			}
 		}
 	}
 	return '';
+}
+
+
+/*
+*PMR 5/16/16 attribution: http://stackoverflow.com/questions/13627308/add-st-nd-rd-and-th-ordinal-suffix-to-a-number
+                          by Salman A from Stack Overflow
+*/
+function ordinal_suffix_of(i) {
+    var j = i % 10,
+        k = i % 100;
+    if (j == 1 && k != 11) {
+        return i + "st";
+    }
+    if (j == 2 && k != 12) {
+        return i + "nd";
+    }
+    if (j == 3 && k != 13) {
+        return i + "rd";
+    }
+    return i + "th";
 }
 
 
