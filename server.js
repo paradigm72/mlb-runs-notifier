@@ -6,13 +6,10 @@ var app = express();
 app.use(bodyParser.json()); // for parsing application/json
 app.use(bodyParser.urlencoded({ extended: true })); // for parsing
 
-MLBhost = 'gd2.mlb.com'
-baseURL = '/components/game/mlb/'
-todayPath = 'year_2016/month_05/day_07/'
-gamePath = 'gid_2016_05_07_texmlb_detmlb_1/'
-notificationURL = 'notifications/notifications_full.xml'
+
 var alreadyReportedScores = []
-composedURL = baseURL + todayPath + gamePath + notificationURL
+var MLBhost = 'gd2.mlb.com';
+
 
 //Retrieve notification log for this game
 http.createServer(function(request, response) {
@@ -24,7 +21,7 @@ http.createServer(function(request, response) {
 
 	var options = {
 		host: MLBhost,
-		path: composedURL
+		path: calculateGameFilePath()
 	};
 	var fullNotificationsXML;
 
@@ -54,6 +51,22 @@ http.createServer(function(request, response) {
 
 }).listen(8888);
 
+function calculateGameFilePath() {
+	var today = new Date();
+	var month = (today.getMonth() + 1);
+	if (month<10) { month = '0' + month};
+	var date = today.getDate();
+	if (date<10) { date = '0' + date};
+
+	baseURL = '/components/game/mlb/';
+	todayPath = 'year_' + today.getFullYear() + '/month_' + month + '/day_' + date + '/';
+	console.log('todayPath=' + todayPath);
+	notificationURL = 'notifications/notifications_full.xml';
+	gamePath = 'gid_2016_05_16_minmlb_detmlb_1/';
+	composedURL = baseURL + todayPath + gamePath + notificationURL;
+	return composedURL;
+}
+
 
 function getNextScore(fullNotificationsObj) {
 	
@@ -78,7 +91,9 @@ function getNextScore(fullNotificationsObj) {
 			console.log('index of this uid in the array=' + alreadyReportedScores.indexOf(thisNotification.$.uid));
 			if (alreadyReportedScores.indexOf(thisNotification.$.uid) == -1) {
 				alreadyReportedScores.push(thisNotification.$.uid);
-				return thisNotification.$.pbp;
+				return thisNotification.$.pbp + 
+						' [Score: Away ' + thisNotification.$.away_team_runs + 
+						', Home ' + thisNotification.$.home_team_runs + ']';
 			}
 		}
 	}
