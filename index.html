@@ -5,23 +5,16 @@
     <script src="app.js"></script>
     <title>Angular-Node HTTP Pull Demo</title>
 </head>
-<body ng-app="angularNodeDemo">
+<body style='background-color: #aaa;' ng-app="angularNodeDemo">
 
 <div ng-controller="dataList">
-    <input type='button' value='Initial Contact' ng-click="initializeList()">
-    {{text}}
+    <input type='button' style='box-shadow: none;
+    border-radius: 0px;
+    font-size: 18px;
+    background-color: #696;
+    color: #eee;' value='Get Next Event' ng-click="initializeList()">
+    <div style='background-color: #ddd; margin-top: 10px; width: 400px;'>{{text}}</div>
     <br>
-
-    <!--  <table class='list'>
-        <tr ng-repeat="item in list">
-            <td>{{item.name}}</td>
-        </tr>
-    </table> -->
-    <input type='button' value='Contact With Params (GET)' ng-click="contactServerGET()">
-    {{getResponse}}
-    <br>
-    <input type='button' value='Contact With Params (POST)' ng-click="contactServerPOST()">
-    {{postResponse}}
 </div>
 
 </body>

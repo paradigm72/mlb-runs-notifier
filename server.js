@@ -2,9 +2,9 @@ var http = require("http");
 var express = require("express");
 var bodyParser = require("body-parser");
 
-var app = express();
-app.use(bodyParser.json()); // for parsing application/json
-app.use(bodyParser.urlencoded({ extended: true })); // for parsing
+// var app = express();
+// app.use(bodyParser.json()); // for parsing application/json
+// app.use(bodyParser.urlencoded({ extended: true })); // for parsing
 
 
 var alreadyReportedScores = []
@@ -148,20 +148,17 @@ function isThisNotificationAScore(thisNotification) {
 
 
 
-app.get('/getResponder',function(request, response) {
-	console.log("GET Request on port 8000");
-	var body = request.body;
-	console.log(body);
-	console.log(request);
-    response.setHeader("Access-Control-Allow-Origin", "*");
-    response.setHeader("Access-Control-Allow-Headers", "X-Requested-With");
-	response.writeHead(200, {"Content-Type": "text/plain"});
-    response.write('response from server: ' + request.query.clientInput);
-    response.end();
-});
-
-
-
-app.listen(8000);
+// app.get('/getResponder',function(request, response) {
+// 	console.log("GET Request on port 8000");
+// 	var body = request.body;
+// 	console.log(body);
+// 	console.log(request);
+//     response.setHeader("Access-Control-Allow-Origin", "*");
+//     response.setHeader("Access-Control-Allow-Headers", "X-Requested-With");
+// 	response.writeHead(200, {"Content-Type": "text/plain"});
+//     response.write('response from server: ' + request.query.clientInput);
+//     response.end();
+// });
+// app.listen(8000);
 
 
