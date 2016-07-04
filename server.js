@@ -62,7 +62,7 @@ function calculateGameFilePath() {
 	todayPath = 'year_' + today.getFullYear() + '/month_' + month + '/day_' + date + '/';
 	console.log('todayPath=' + todayPath);
 	notificationURL = 'notifications/notifications_full.xml';
-	gamePath = 'gid_2016_05_16_minmlb_detmlb_1/';  //NEED TO ADJUST THIS EACH DAY DURING DEBUGGING
+	gamePath = 'gid_2016_07_03_detmlb_tbamlb_1/';  //NEED TO ADJUST THIS EACH DAY DURING DEBUGGING
 	composedURL = baseURL + todayPath + gamePath + notificationURL;
 	return composedURL;
 }
