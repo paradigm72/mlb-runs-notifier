@@ -59,7 +59,8 @@ function calculateGameFilePath() {
 	if (date<10) { date = '0' + date};
 
 	baseURL = '/components/game/mlb/';
-	todayPath = 'year_' + today.getFullYear() + '/month_' + month + '/day_' + date + '/';
+	//todayPath = 'year_' + today.getFullYear() + '/month_' + month + '/day_' + date + '/';
+	todayPath = 'year_' + '2016' + '/month_' + '07' + '/day_' + '03' + '/';
 	console.log('todayPath=' + todayPath);
 	notificationURL = 'notifications/notifications_full.xml';
 	gamePath = 'gid_2016_07_03_detmlb_tbamlb_1/';  //NEED TO ADJUST THIS EACH DAY DURING DEBUGGING
