@@ -9,6 +9,7 @@ var bodyParser = require("body-parser");
 
 var alreadyReportedScores = []
 var MLBhost = 'gd2.mlb.com';
+var thisTeamCode = 'det';
 
 
 //Retrieve notification log for this game
@@ -53,36 +54,51 @@ http.createServer(function(request, response) {
 
 function calculateGameFilePath() {
 	var today = new Date();
-	var month = (today.getMonth() + 1);
-	if (month<10) { month = '0' + month};
-	var date = today.getDate();
-	if (date<10) { date = '0' + date};
+	var todayMonth = (today.getMonth() + 1);
+	if (todayMonth<10) { todayMonth = '0' + todayMonth};
+	var todayDate = today.getDate();
+	if (todayDate<10) { todayDate = '0' + todayDate};
 
 	baseURL = '/components/game/mlb/';
 	//todayPath = 'year_' + today.getFullYear() + '/month_' + month + '/day_' + date + '/';
 	todayPath = 'year_' + '2016' + '/month_' + '07' + '/day_' + '03' + '/';
 	console.log('todayPath=' + todayPath);
 	notificationURL = 'notifications/notifications_full.xml';
-	gamePath = 'gid_2016_07_03_detmlb_tbamlb_1/';  //NEED TO ADJUST THIS EACH DAY DURING DEBUGGING
+	gamePath = 'gid_2016_07_03_detmlb_tbamlb_1/';
 	composedURL = baseURL + todayPath + gamePath + notificationURL;
 	return composedURL;
 }
 
+function containsMatchingSubDir(patternToMatch) {
+	//do the iteration of the sub-dirs, to see if one matches the pattern
+}
+
+//drop-in replacement for calculateGameFilePath when done
+function findMostRecentGameFile() {
+	//start at today's directory
+	//loop over all of the sub-directories of the form gid_<today's date> to see if one contains 'detmlb'
+	if (containsMatchingSubDir(thisTeamCode))
+	{
+		//return this subdir
+	}
+	//if yes, return that directory
+	//if no, step back up, go to the previous day, and repeat the loop
+}
 
 function getNextScore(fullNotificationsObj) {
 	
 	//get the right team's notification list
 	var teamNodes = [];
 	var teamNode;
-	var DETisAway;
+	var myTeamIsAway;
 	teamNodes = fullNotificationsObj.notifications.team;
-	if (teamNodes[0].$.code == 'det') {
+	if (teamNodes[0].$.code == thisTeamCode) {
 		teamNode = teamNodes[0];
-		DETisAway = true;
+		myTeamIsAway = true;
 		otherTeamCode = teamNodes[1].$.code;
 	} else {
 		teamNode = teamNodes[1];
-		DETisAway = false;
+		myTeamIsAway = false;
 		otherTeamCode = teamNodes[0].$.code;
 	}
 
@@ -101,13 +117,13 @@ function getNextScore(fullNotificationsObj) {
 				//going to return a score to the client
 				var boxScore;
 				var inning = ordinal_suffix_of(thisNotification.$.inning);
-				if (DETisAway) {
-					boxScore = ' [' + inning + ': DET ' + thisNotification.$.away_team_runs + 
+				if (myTeamIsAway) {
+					boxScore = ' [' + inning + ': ' + thisTeamCode.toUpperCase() + ' ' + thisNotification.$.away_team_runs + 
 						', ' + otherTeamCode.toUpperCase() + ' ' + thisNotification.$.home_team_runs + ']';	
 				}
 				else {
 					boxScore = ' [' + inning + ': ' + otherTeamCode.toUpperCase() + ' ' + thisNotification.$.away_team_runs + 
-						', DET ' + thisNotification.$.home_team_runs + ']';						
+						', ' + thisTeamCode.toUpperCase() + ' ' + thisNotification.$.home_team_runs + ']';						
 				}
 				return thisNotification.$.pbp + boxScore;
 			}
