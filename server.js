@@ -18,6 +18,7 @@ http.createServer(function(request, response) {
     response.setHeader("Access-Control-Allow-Origin", "*");
     response.setHeader("Access-Control-Allow-Headers", "X-Requested-With");
 	response.writeHead(200, {"Content-Type": "text/plain"});
+
 	var parentResponse = response;
 
 	var options = {
@@ -64,25 +65,32 @@ function calculateGameFilePath() {
 	todayPath = 'year_' + '2016' + '/month_' + '07' + '/day_' + '03' + '/';
 	console.log('todayPath=' + todayPath);
 	notificationURL = 'notifications/notifications_full.xml';
-	gamePath = 'gid_2016_07_03_detmlb_tbamlb_1/';
+	//gamePath = 'gid_2016_07_03_detmlb_tbamlb_1/';
+	gamePath = checkScoreBoardForGameSubDir(baseURL + todayPath);
 	composedURL = baseURL + todayPath + gamePath + notificationURL;
 	return composedURL;
 }
 
-function containsMatchingSubDir(patternToMatch) {
-	//do the iteration of the sub-dirs, to see if one matches the pattern
+function parseScoreBoardForGameSubDir() {
+	//do the actual parsing of the JSON text here, return the subdir name to be used as 'gamePath' later on
 }
 
-//drop-in replacement for calculateGameFilePath when done
-function findMostRecentGameFile() {
-	//start at today's directory
-	//loop over all of the sub-directories of the form gid_<today's date> to see if one contains 'detmlb'
-	if (containsMatchingSubDir(thisTeamCode))
-	{
-		//return this subdir
+//need to call this earlier on, then have the main request for the notifications file be in this one's callback
+function checkScoreBoardForGameSubDir(composedTodayURL) {
+	var scoreBoardResult;
+	var scoreBoardRequest = {
+		options: {
+			host: MLBhost,
+			path: composedTodayURL  //looking for miniscoreboard.json in this directory
+		},
+		callback: function(response) {
+			response.on('data', function(chunk) {
+				scoreBoardResult += chunk;
+			});
+			response.on('end', parseScoreBoardForGameSubDir);
+		}
 	}
-	//if yes, return that directory
-	//if no, step back up, go to the previous day, and repeat the loop
+	http.request(scoreBoardRequest.options, scoreBoardRequest.callback).end();
 }
 
 function getNextScore(fullNotificationsObj) {
