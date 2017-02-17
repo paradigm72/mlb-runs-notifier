@@ -41,6 +41,18 @@ function setupAndLaunchSBRequest(parentResponse) {
 	gamePath = requestSBforGameFilePath(parentResponse, baseURL + todayPath + 'miniscoreboard.json');
 }
 
+//step 3: parse the result from the scoreboard, to get the directory of the right game
+var parseScoreBoardForGameSubDir = function parseScoreBoardForGameSubDir() {
+	
+	//how to pass down the result from the 'data' chunks into this callback? is it a scoping issue?
+	console.log(scoreBoardResult);
+	//do the actual parsing of the JSON text here, return the subdir name to be used as 'gamePath' later on
+	composedNotificationsURL = ''; //fill in from the JSON
+	//composedURL = baseURL + todayPath + gamePath + notificationURL;
+
+	//notificationURL = 'notifications/notifications_full.xml';
+	//gamePath = 'gid_2016_07_03_detmlb_tbamlb_1/';
+}
 
 //step 2: initiate the first http request to get the scoreboard
 function requestSBforGameFilePath(parentResponse, pathToSB) {
@@ -55,21 +67,10 @@ function requestSBforGameFilePath(parentResponse, pathToSB) {
 				scoreBoardResult += chunk;
 				console.log(chunk);
 			});
-			response.on('end', parseScoreBoardForGameSubDir(scoreBoardResult));
+			response.on('end', parseScoreBoardForGameSubDir);
 		}
 	}
 	http.request(scoreBoardRequest.options, scoreBoardRequest.callback).end();
-}
-
-
-//step 3: parse the result from the scoreboard, to get the directory of the right game
-function parseScoreBoardForGameSubDir(scoreBoardResult) {
-	//do the actual parsing of the JSON text here, return the subdir name to be used as 'gamePath' later on
-	composedNotificationsURL = ''; //fill in from the JSON
-	//composedURL = baseURL + todayPath + gamePath + notificationURL;
-
-	//notificationURL = 'notifications/notifications_full.xml';
-	//gamePath = 'gid_2016_07_03_detmlb_tbamlb_1/';
 }
 
 //REFACTOR NOT COMPLETE BELOW THIS LINE
