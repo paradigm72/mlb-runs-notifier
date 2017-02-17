@@ -10,6 +10,7 @@ var bodyParser = require("body-parser");
 var alreadyReportedScores = []
 var MLBhost = 'gd2.mlb.com';
 var thisTeamCode = 'det';
+var composedNotificationsURL = '';
 
 
 //Retrieve notification log for this game
@@ -19,8 +20,61 @@ http.createServer(function(request, response) {
     response.setHeader("Access-Control-Allow-Headers", "X-Requested-With");
 	response.writeHead(200, {"Content-Type": "text/plain"});
 
-	var parentResponse = response;
+	//step 1: find the current game to get details for
+	setupAndLaunchSBRequest(response);
 
+}).listen(8888);
+
+//step 1: setup for the first http request to get the scoreboard
+function setupAndLaunchSBRequest(parentResponse) {
+	var today = new Date();
+	var todayMonth = (today.getMonth() + 1);
+	if (todayMonth<10) { todayMonth = '0' + todayMonth};
+	var todayDate = today.getDate();
+	if (todayDate<10) { todayDate = '0' + todayDate};
+
+	baseURL = '/components/game/mlb/';
+	todayPath = 'year_' + today.getFullYear() + '/month_' + todayMonth + '/day_' + todayDate + '/';
+	todayPath = 'year_' + '2016' + '/month_' + '07' + '/day_' + '03' + '/';
+	console.log('todayPath=' + todayPath);
+
+	gamePath = requestSBforGameFilePath(parentResponse, baseURL + todayPath + 'miniscoreboard.json');
+}
+
+
+//step 2: initiate the first http request to get the scoreboard
+function requestSBforGameFilePath(parentResponse, pathToSB) {
+	var scoreBoardResult;
+	var scoreBoardRequest = {
+		options: {
+			host: MLBhost,
+			path: pathToSB  //looking for miniscoreboard.json in this directory
+		},
+		callback: function(response) {
+			response.on('data', function(chunk) {
+				scoreBoardResult += chunk;
+				console.log(chunk);
+			});
+			response.on('end', parseScoreBoardForGameSubDir(scoreBoardResult));
+		}
+	}
+	http.request(scoreBoardRequest.options, scoreBoardRequest.callback).end();
+}
+
+
+//step 3: parse the result from the scoreboard, to get the directory of the right game
+function parseScoreBoardForGameSubDir(scoreBoardResult) {
+	//do the actual parsing of the JSON text here, return the subdir name to be used as 'gamePath' later on
+	composedNotificationsURL = ''; //fill in from the JSON
+	//composedURL = baseURL + todayPath + gamePath + notificationURL;
+
+	//notificationURL = 'notifications/notifications_full.xml';
+	//gamePath = 'gid_2016_07_03_detmlb_tbamlb_1/';
+}
+
+//REFACTOR NOT COMPLETE BELOW THIS LINE
+
+function requestNotificationsForGame(parentResponse) {
 	var options = {
 		host: MLBhost,
 		path: calculateGameFilePath()
@@ -43,55 +97,14 @@ http.createServer(function(request, response) {
 				//console.log('outside the scope of getNextScore, prevScoreUID=' + prevScoreUID);
 				console.log(scoreText);
 				parentResponse.write(scoreText)
-
 			})
 			parentResponse.end();
 		});
 	}
 	console.log("End of response");
     http.request(options, callback).end();	
-
-}).listen(8888);
-
-function calculateGameFilePath() {
-	var today = new Date();
-	var todayMonth = (today.getMonth() + 1);
-	if (todayMonth<10) { todayMonth = '0' + todayMonth};
-	var todayDate = today.getDate();
-	if (todayDate<10) { todayDate = '0' + todayDate};
-
-	baseURL = '/components/game/mlb/';
-	//todayPath = 'year_' + today.getFullYear() + '/month_' + month + '/day_' + date + '/';
-	todayPath = 'year_' + '2016' + '/month_' + '07' + '/day_' + '03' + '/';
-	console.log('todayPath=' + todayPath);
-	notificationURL = 'notifications/notifications_full.xml';
-	//gamePath = 'gid_2016_07_03_detmlb_tbamlb_1/';
-	gamePath = checkScoreBoardForGameSubDir(baseURL + todayPath);
-	composedURL = baseURL + todayPath + gamePath + notificationURL;
-	return composedURL;
 }
 
-function parseScoreBoardForGameSubDir() {
-	//do the actual parsing of the JSON text here, return the subdir name to be used as 'gamePath' later on
-}
-
-//need to call this earlier on, then have the main request for the notifications file be in this one's callback
-function checkScoreBoardForGameSubDir(composedTodayURL) {
-	var scoreBoardResult;
-	var scoreBoardRequest = {
-		options: {
-			host: MLBhost,
-			path: composedTodayURL  //looking for miniscoreboard.json in this directory
-		},
-		callback: function(response) {
-			response.on('data', function(chunk) {
-				scoreBoardResult += chunk;
-			});
-			response.on('end', parseScoreBoardForGameSubDir);
-		}
-	}
-	http.request(scoreBoardRequest.options, scoreBoardRequest.callback).end();
-}
 
 function getNextScore(fullNotificationsObj) {
 	
