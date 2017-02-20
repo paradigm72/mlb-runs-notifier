@@ -7,13 +7,14 @@ var bodyParser = require("body-parser");
 // app.use(bodyParser.urlencoded({ extended: true })); // for parsing
 
 
-var alreadyReportedScores = []
+var alreadyReportedScores = [];
 var MLBhost = 'gd2.mlb.com';
 var thisTeamCode = 'det';
 var composedNotificationsURL = '';
+var scoreBoardJSONResult = '';
 
 
-//Retrieve notification log for this game
+//Set up listener which starts the first HTTP request to gd2.mlb.com when it gets a request from the client/page
 http.createServer(function(request, response) {
 	console.log("GET Request on port 8888");
     response.setHeader("Access-Control-Allow-Origin", "*");
@@ -43,20 +44,28 @@ function setupAndLaunchSBRequest(parentResponse) {
 
 //step 3: parse the result from the scoreboard, to get the directory of the right game
 var parseScoreBoardForGameSubDir = function parseScoreBoardForGameSubDir() {
-	
-	//how to pass down the result from the 'data' chunks into this callback? is it a scoping issue?
-	console.log(scoreBoardResult);
+	//console.log(scoreBoardJSONResult.toString());
+	console.log(typeof(scoreBoardJSONResult));
+	var scoreBoardJSONResultObject = JSON.parse(scoreBoardJSONResult);
+	console.log(typeof(scoreBoardJSONResultObject));
+	//console.log(scoreBoardJSONResultObject.subject);
+	//console.log(scoreBoardJSONResultObject.data);
+	console.log(scoreBoardJSONResultObject.data.games.game.length);
 	//do the actual parsing of the JSON text here, return the subdir name to be used as 'gamePath' later on
-	composedNotificationsURL = ''; //fill in from the JSON
-	//composedURL = baseURL + todayPath + gamePath + notificationURL;
-
-	//notificationURL = 'notifications/notifications_full.xml';
-	//gamePath = 'gid_2016_07_03_detmlb_tbamlb_1/';
+	for (var gameNumber = 0; gameNumber <= scoreBoardJSONResultObject.data.games.game.length; gameNumber++) {
+		console.log("checking game " + gameNumber + " in: " + scoreBoardJSONResultObject.data.games.game[gameNumber].location);
+		if ((scoreBoardJSONResultObject.data.games.game[gameNumber].home_code === thisTeamCode) ||
+			(scoreBoardJSONResultObject.data.games.game[gameNumber].away_code === thisTeamCode)) {
+			composedNotificationsURL = scoreBoardJSONResultObject.data.games.game[gameNumber].game_data_directory;
+			console.log("found matching game, path is: " + composedNotificationsURL);
+			break;
+		}
+	};
+	//fire off step 4, next http request for the actual data
 }
 
 //step 2: initiate the first http request to get the scoreboard
 function requestSBforGameFilePath(parentResponse, pathToSB) {
-	var scoreBoardResult;
 	var scoreBoardRequest = {
 		options: {
 			host: MLBhost,
@@ -64,8 +73,8 @@ function requestSBforGameFilePath(parentResponse, pathToSB) {
 		},
 		callback: function(response) {
 			response.on('data', function(chunk) {
-				scoreBoardResult += chunk;
-				console.log(chunk);
+				scoreBoardJSONResult += chunk;
+				//console.log(chunk);
 			});
 			response.on('end', parseScoreBoardForGameSubDir);
 		}
