@@ -66,6 +66,8 @@ var parseScoreBoardForGameSubDir = function parseScoreBoardForGameSubDir(parentR
 			break;
 		}
 	};
+	scoreBoardJSONResult = '';
+
 	//fire off step 4, next http request for the actual data
 	console.log("4: parentResponse is:" + parentResponse);
 	requestNotificationsForGame(parentResponse, composedNotificationsURL);
