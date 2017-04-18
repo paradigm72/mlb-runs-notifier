@@ -39,7 +39,7 @@ function setupAndLaunchSBRequest(parentResponse) {
 
 	baseURL = '/components/game/mlb/';
 	todayPath = 'year_' + today.getFullYear() + '/month_' + todayMonth + '/day_' + todayDate + '/';
-	todayPath = 'year_' + '2016' + '/month_' + '07' + '/day_' + '02' + '/';
+	//todayPath = 'year_' + '2016' + '/month_' + '07' + '/day_' + '02' + '/';
 	console.log('todayPath=' + todayPath);
 
 	console.log("2: parentResponse is:" + parentResponse);
@@ -56,7 +56,7 @@ var parseScoreBoardForGameSubDir = function parseScoreBoardForGameSubDir(parentR
 	//console.log(scoreBoardJSONResultObject.data);
 	console.log(scoreBoardJSONResultObject.data.games.game.length);
 	//do the actual parsing of the JSON text here, return the subdir name to be used as 'gamePath' later on
-	for (var gameNumber = 0; gameNumber <= scoreBoardJSONResultObject.data.games.game.length; gameNumber++) {
+	for (var gameNumber = 0; gameNumber < scoreBoardJSONResultObject.data.games.game.length; gameNumber++) {
 		console.log("checking game " + gameNumber + " in: " + scoreBoardJSONResultObject.data.games.game[gameNumber].location);
 		if ((scoreBoardJSONResultObject.data.games.game[gameNumber].home_code === thisTeamCode) ||
 			(scoreBoardJSONResultObject.data.games.game[gameNumber].away_code === thisTeamCode)) {
@@ -69,8 +69,14 @@ var parseScoreBoardForGameSubDir = function parseScoreBoardForGameSubDir(parentR
 	scoreBoardJSONResult = '';
 
 	//fire off step 4, next http request for the actual data
-	console.log("4: parentResponse is:" + parentResponse);
-	requestNotificationsForGame(parentResponse, composedNotificationsURL);
+	if (composedNotificationsURL > 0) {
+		console.log("4: parentResponse is:" + parentResponse);
+		requestNotificationsForGame(parentResponse, composedNotificationsURL);
+	}
+	else {
+		parentResponseObj.write("No game found for the Tigers today");
+		parentResponseObj.end();
+	}	
 }
 
 //step 2: initiate the first http request to get the scoreboard
