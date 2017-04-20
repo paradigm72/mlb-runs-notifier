@@ -69,7 +69,7 @@ var parseScoreBoardForGameSubDir = function parseScoreBoardForGameSubDir(parentR
 	scoreBoardJSONResult = '';
 
 	//fire off step 4, next http request for the actual data
-	if (composedNotificationsURL > 0) {
+	if (composedNotificationsURL.length > 0) {
 		console.log("4: parentResponse is:" + parentResponse);
 		requestNotificationsForGame(parentResponse, composedNotificationsURL);
 	}
