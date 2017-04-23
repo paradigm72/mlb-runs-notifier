@@ -17,16 +17,20 @@ var parentResponseObj = {};
 
 //Set up listener which starts the first HTTP request to gd2.mlb.com when it gets a request from the client/page
 http.createServer(function(request, response) {
-	console.log("GET Request on port 8888");
+	console.log("GET Request on port 8888: " + request.url);
     response.setHeader("Access-Control-Allow-Origin", "*");
     response.setHeader("Access-Control-Allow-Headers", "X-Requested-With");
 	response.writeHead(200, {"Content-Type": "text/plain"});
 
-	//step 1: find the current game to get details for
-	console.log("1: parentResponse is:" + response);
-	parentResponseObj = response;
-	setupAndLaunchSBRequest(response);
-
+	if (request.url === '/getTodaysScores') {
+		//step 1: find the current game to get details for
+		console.log("1: parentResponse is:" + response);
+		parentResponseObj = response;
+		setupAndLaunchSBRequest(response);	
+	}
+	else if (request.url === '/runUnitTests') {
+		console.log("run the unit tests");
+	}
 }).listen(8888);
 
 //step 1: setup for the first http request to get the scoreboard
