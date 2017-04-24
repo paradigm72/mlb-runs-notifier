@@ -30,6 +30,8 @@ http.createServer(function(request, response) {
 	}
 	else if (request.url === '/runUnitTests') {
 		console.log("run the unit tests");
+		parentResponseObj = response;
+		setupStaticTestRequest(response);
 	}
 }).listen(8888);
 
@@ -47,6 +49,13 @@ function setupAndLaunchSBRequest(parentResponse) {
 	console.log('todayPath=' + todayPath);
 
 	console.log("2: parentResponse is:" + parentResponse);
+	gamePath = requestSBforGameFilePath(parentResponse, baseURL + todayPath + 'miniscoreboard.json');
+}
+
+//step 1a: setup for a specific day's request, for integration testing
+function setupStaticTestRequest(parentResponse) {
+	baseURL = "/components/game/mlb/";
+	todayPath = 'year_' + '2016' + '/month_' + '07' + '/day_' + '02' + '/';
 	gamePath = requestSBforGameFilePath(parentResponse, baseURL + todayPath + 'miniscoreboard.json');
 }
 
